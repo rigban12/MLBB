@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLBB Hero Spin Wheel</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        #spin-wheel {
+            border: 16px solid #C5B356;
+            border-radius: 50%;
+            width: 300px;
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            background: #FFD700;
+            transform-origin: 100% 100%;
+        }
+        .segment span {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            transform: rotate(180deg);
+            color: white;
+            text-align: center;
+            width: 100%;
+        }
+        button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="spin-wheel">
+        <!-- Wheel Segments -->
+        <div class="segment" style="transform: rotate(0deg);"><span>Hero 1</span></div>
+        <div class="segment" style="transform: rotate(60deg);"><span>Hero 2</span></div>
+        <div class="segment" style="transform: rotate(120deg);"><span>Hero 3</span></div>
+        <div class="segment" style="transform: rotate(180deg);"><span>Hero 4</span></div>
+        <div class="segment" style="transform: rotate(240deg);"><span>Hero 5</span></div>
+        <div class="segment" style="transform: rotate(300deg);"><span>Hero 6</span></div>
+    </div>
+    <button onclick="spin()">Spin the Wheel!</button>
+    <script>
+        function spin() {
+            const wheel = document.getElementById("spin-wheel");
+            const randomDegree = Math.floor(Math.random() * 360) + 3600; // Spin at least 10 times
+            wheel.style.transition = "transform 4s ease-out";
+            wheel.style.transform = `rotate(${randomDegree}deg)`;
+        }
+    </script>
+</body>
+</html>
