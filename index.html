@@ -1,64 +1,468 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLBB Hero Spin Wheel</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-        }
-        #spin-wheel {
-            border: 16px solid #C5B356;
-            border-radius: 50%;
-            width: 300px;
-            height: 300px;
-            position: relative;
-            overflow: hidden;
-        }
-        .segment {
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            background: #FFD700;
-            transform-origin: 100% 100%;
-        }
-        .segment span {
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            transform: rotate(180deg);
-            color: white;
-            text-align: center;
-            width: 100%;
-        }
-        button {
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div id="spin-wheel">
-        <!-- Wheel Segments -->
-        <div class="segment" style="transform: rotate(0deg);"><span>Hero 1</span></div>
-        <div class="segment" style="transform: rotate(60deg);"><span>Hero 2</span></div>
-        <div class="segment" style="transform: rotate(120deg);"><span>Hero 3</span></div>
-        <div class="segment" style="transform: rotate(180deg);"><span>Hero 4</span></div>
-        <div class="segment" style="transform: rotate(240deg);"><span>Hero 5</span></div>
-        <div class="segment" style="transform: rotate(300deg);"><span>Hero 6</span></div>
-    </div>
-    <button onclick="spin()">Spin the Wheel!</button>
-    <script>
-        function spin() {
-            const wheel = document.getElementById("spin-wheel");
-            const randomDegree = Math.floor(Math.random() * 360) + 3600; // Spin at least 10 times
-            wheel.style.transition = "transform 4s ease-out";
-            wheel.style.transform = `rotate(${randomDegree}deg)`;
-        }
-    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MLBB Hero Spin Wheel</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #f5c518;
+    --gold2: #ffdd57;
+    --bg: #0a0c14;
+    --panel: #10131f;
+    --border: #1e2540;
+    --tank: #4a9eff;
+    --fighter: #ff6b35;
+    --mage: #a855f7;
+    --marksman: #22c55e;
+    --assassin: #ef4444;
+    --support: #f59e0b;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+
+  /* Starfield background */
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background: 
+      radial-gradient(ellipse at 20% 30%, rgba(74,158,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 70%, rgba(168,85,247,0.07) 0%, transparent 60%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(245,197,24,0.5);
+    margin-bottom: 6px;
+    position: relative;
+    z-index:1;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    color: #5a6490;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    position: relative;
+    z-index:1;
+  }
+
+  .app {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+    padding: 0 16px 24px;
+  }
+
+  /* --- WHEEL SECTION --- */
+  .wheel-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .wheel-outer {
+    position: relative;
+    width: 420px;
+    height: 420px;
+  }
+
+  /* Glow ring behind wheel */
+  .wheel-outer::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #4a9eff22, #a855f722, #ef444422, #22c55e22, #ff6b3522, #f59e0b22, #4a9eff22);
+    animation: rotatering 8s linear infinite;
+    filter: blur(8px);
+    z-index: 0;
+  }
+
+  @keyframes rotatering { to { transform: rotate(360deg); } }
+
+  #wheelCanvas {
+    position: relative;
+    z-index: 1;
+    border-radius: 50%;
+    box-shadow: 0 0 40px rgba(245,197,24,0.15), 0 0 80px rgba(74,158,255,0.1);
+  }
+
+  /* Pointer */
+  .pointer {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    filter: drop-shadow(0 2px 8px rgba(245,197,24,0.8));
+  }
+
+  /* Spin button in center */
+  .spin-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #ffe566, #c89a00);
+    border: 3px solid #f5c518;
+    cursor: pointer;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    color: #1a1000;
+    text-transform: uppercase;
+    box-shadow: 0 0 20px rgba(245,197,24,0.6), inset 0 2px 4px rgba(255,255,255,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .spin-btn:hover:not(:disabled) {
+    transform: translate(-50%, -50%) scale(1.08);
+    box-shadow: 0 0 30px rgba(245,197,24,0.9), inset 0 2px 4px rgba(255,255,255,0.3);
+  }
+  .spin-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+  /* --- RESULT PANEL --- */
+  .result-panel {
+    width: 280px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+  }
+
+  .result-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: #5a6490;
+    text-transform: uppercase;
+  }
+
+  .result-hero {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #fff;
+    min-height: 2.4rem;
+    transition: color 0.4s;
+    text-shadow: 0 0 20px currentColor;
+    word-break: break-word;
+  }
+
+  .result-role {
+    display: inline-block;
+    padding: 3px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .divider { height:1px; background: var(--border); }
+
+  /* Filters */
+  .filter-section { display: flex; flex-direction: column; gap: 10px; }
+  .filter-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: #5a6490;
+    text-transform: uppercase;
+  }
+  .role-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .role-btn {
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1.5px solid;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .role-btn.active { color: #000; }
+  .role-btn[data-role="Tank"]       { border-color: var(--tank);      color: var(--tank); }
+  .role-btn[data-role="Fighter"]    { border-color: var(--fighter);   color: var(--fighter); }
+  .role-btn[data-role="Mage"]       { border-color: var(--mage);      color: var(--mage); }
+  .role-btn[data-role="Marksman"]   { border-color: var(--marksman);  color: var(--marksman); }
+  .role-btn[data-role="Assassin"]   { border-color: var(--assassin);  color: var(--assassin); }
+  .role-btn[data-role="Support"]    { border-color: var(--support);   color: var(--support); }
+  .role-btn[data-role="Tank"].active       { background: var(--tank);      color:#000; }
+  .role-btn[data-role="Fighter"].active    { background: var(--fighter);   color:#fff; }
+  .role-btn[data-role="Mage"].active       { background: var(--mage);      color:#fff; }
+  .role-btn[data-role="Marksman"].active   { background: var(--marksman);  color:#000; }
+  .role-btn[data-role="Assassin"].active   { background: var(--assassin);  color:#fff; }
+  .role-btn[data-role="Support"].active    { background: var(--support);   color:#000; }
+
+< truncated lines 235-314 >
+  // Fighters
+  {name:'Balmond',role:'Fighter'},{name:'Zilong',role:'Fighter'},{name:'Alucard',role:'Fighter'},
+  {name:'Chou',role:'Fighter'},{name:'Sun',role:'Fighter'},{name:'Alpha',role:'Fighter'},
+  {name:'Ruby',role:'Fighter'},{name:'Roger',role:'Fighter'},{name:'Silvanna',role:'Fighter'},
+  {name:'Minsitthar',role:'Fighter'},{name:'Thamuz',role:'Fighter'},{name:'Badang',role:'Fighter'},
+  {name:'Khaleed',role:'Fighter'},{name:'Paquito',role:'Fighter'},{name:'Phoveus',role:'Fighter'},
+  {name:'Aulus',role:'Fighter'},{name:'Terizla',role:'Fighter'},{name:'X.Borg',role:'Fighter'},
+  {name:'Dyrroth',role:'Fighter'},{name:'Aldous',role:'Fighter'},{name:'Leomord',role:'Fighter'},
+  {name:'Guinevere',role:'Fighter'},{name:'Freya',role:'Fighter'},{name:'Yu Zhong',role:'Fighter'},
+  {name:'Lapu-Lapu',role:'Fighter'},{name:'Jawhead',role:'Fighter'},{name:'Hilda',role:'Fighter'},
+  {name:'Martis',role:'Fighter'},{name:'Masha',role:'Fighter'},{name:'Julian',role:'Fighter'},
+  {name:'Yin',role:'Fighter'},{name:'Nolan',role:'Fighter'},{name:'Sora',role:'Fighter'},
+  {name:'Lukas',role:'Fighter'},
+  // Mages
+  {name:'Nana',role:'Mage'},{name:'Eudora',role:'Mage'},{name:'Kagura',role:'Mage'},
+  {name:'Aurora',role:'Mage'},{name:'Gord',role:'Mage'},{name:'Cyclops',role:'Mage'},
+  {name:'Vexana',role:'Mage'},{name:'Odette',role:'Mage'},{name:'Harley',role:'Mage'},
+  {name:'Lunox',role:'Mage'},{name:'Vale',role:'Mage'},{name:'Pharsa',role:'Mage'},
+  {name:'Lylia',role:'Mage'},{name:'Yve',role:'Mage'},{name:'Valentina',role:'Mage'},
+  {name:'Cecilion',role:'Mage'},{name:'Chang\'e',role:'Mage'},{name:'Alice',role:'Mage'},
+  {name:'Luo Yi',role:'Mage'},{name:'Xavier',role:'Mage'},{name:'Zhuxin',role:'Mage'},
+  {name:'Novaria',role:'Mage'},{name:'Joy',role:'Mage'},{name:'Faramis',role:'Mage'},
+  {name:'Kadita',role:'Mage'},{name:'Kimmy',role:'Mage'},{name:'Esmeralda',role:'Mage'},
+  {name:'Zetian',role:'Mage'},{name:'Nolan',role:'Mage'},{name:'Chip',role:'Mage'},
+  // Marksmen
+  {name:'Layla',role:'Marksman'},{name:'Miya',role:'Marksman'},{name:'Bruno',role:'Marksman'},
+  {name:'Clint',role:'Marksman'},{name:'Moskov',role:'Marksman'},{name:'Irithel',role:'Marksman'},
+  {name:'Karrie',role:'Marksman'},{name:'Lesley',role:'Marksman'},{name:'Hanabi',role:'Marksman'},
+  {name:'Claude',role:'Marksman'},{name:'Granger',role:'Marksman'},{name:'Wanwan',role:'Marksman'},
+  {name:'Popol and Kupa',role:'Marksman'},{name:'Beatrix',role:'Marksman'},{name:'Natan',role:'Marksman'},
+  {name:'Melissa',role:'Marksman'},{name:'Ixia',role:'Marksman'},{name:'Corrina',role:'Marksman'},
+  {name:'Yi Sun-shin',role:'Marksman'},{name:'Brody',role:'Marksman'},{name:'Edith',role:'Marksman'},
+  {name:'Odette',role:'Marksman'},
+  // Assassins
+  {name:'Saber',role:'Assassin'},{name:'Karina',role:'Assassin'},{name:'Fanny',role:'Assassin'},
+  {name:'Hayabusa',role:'Assassin'},{name:'Natalia',role:'Assassin'},{name:'Lancelot',role:'Assassin'},
+  {name:'Gusion',role:'Assassin'},{name:'Hanzo',role:'Assassin'},{name:'Helcurt',role:'Assassin'},
+  {name:'Selena',role:'Assassin'},{name:'Mathilda',role:'Assassin'},{name:'Ling',role:'Assassin'},
+  {name:'Benedetta',role:'Assassin'},{name:'Aamon',role:'Assassin'},{name:'Yi Sun-shin',role:'Assassin'},
+  {name:'Harith',role:'Assassin'},{name:'Lancelot',role:'Assassin'},{name:'Arlott',role:'Assassin'},
+  {name:'Nolan',role:'Assassin'},{name:'Suyou',role:'Assassin'},{name:'Kalea',role:'Assassin'},
+  // Supports
+  {name:'Rafaela',role:'Support'},{name:'Angela',role:'Support'},{name:'Estes',role:'Support'},
+  {name:'Diggie',role:'Support'},{name:'Carmilla',role:'Support'},{name:'Floryn',role:'Support'},
+  {name:'Mathilda',role:'Support'},{name:'Kaja',role:'Support'},{name:'Nana',role:'Support'},
+  {name:'Faramis',role:'Support'},{name:'Tigreal',role:'Support'},{name:'Belerick',role:'Support'},
+  {name:'Jawhead',role:'Support'},{name:'Minotaur',role:'Support'},{name:'Lolita',role:'Support'},
+  {name:'Kalea',role:'Support'},
+];
+
+// Deduplicate by name
+const seen = new Set();
+const HEROES = ALL_HEROES.filter(h => {
+  const key = h.name + h.role;
+  if (seen.has(key)) return false;
+  seen.add(key); return true;
+});
+
+// Also unique by name only for the wheel
+const nameSet = new Set();
+const UNIQUE_HEROES = [];
+for (const h of HEROES) {
+  if (!nameSet.has(h.name)) { nameSet.add(h.name); UNIQUE_HEROES.push(h); }
+}
+
+let activeRoles = new Set(['Tank','Fighter','Mage','Marksman','Assassin','Support']);
+let filteredHeroes = [...UNIQUE_HEROES];
+let currentAngle = 0;
+let spinning = false;
+
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+
+function getFiltered() {
+  return UNIQUE_HEROES.filter(h => activeRoles.has(h.role));
+}
+
+function drawWheel(rotationOffset = 0) {
+  const heroes = getFiltered();
+  const n = heroes.length;
+  if (n === 0) { ctx.clearRect(0,0,420,420); return; }
+
+  const cx = 210, cy = 210, r = 200;
+  const arc = (2 * Math.PI) / n;
+  ctx.clearRect(0,0,420,420);
+
+  for (let i = 0; i < n; i++) {
+    const startAngle = rotationOffset + i * arc;
+    const endAngle = startAngle + arc;
+    const color = ROLE_COLORS[heroes[i].role];
+
+    // Segment
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = i % 2 === 0 ? color + 'dd' : color + '88';
+    ctx.fill();
+    ctx.strokeStyle = '#0a0c14';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // Label (only if enough segments are large enough)
+    if (arc > 0.06) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(startAngle + arc / 2);
+      const textR = n > 60 ? r * 0.62 : r * 0.68;
+      ctx.translate(textR, 0);
+      ctx.rotate(Math.PI / 2);
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${n > 80 ? 6 : n > 50 ? 7 : n > 30 ? 8 : 10}px Rajdhani, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      // Truncate long names
+      let label = heroes[i].name;
+      if (label.length > 10 && n > 40) label = label.slice(0,8)+'…';
+      ctx.fillText(label, 0, 0);
+      ctx.restore();
+    }
+  }
+
+  // Center cap
+  ctx.beginPath();
+  ctx.arc(cx, cy, 38, 0, 2*Math.PI);
+  ctx.fillStyle = '#0a0c14';
+  ctx.fill();
+  ctx.strokeStyle = '#f5c518';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2*Math.PI);
+  ctx.strokeStyle = '#1e2540';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+}
+
+function spin() {
+  const heroes = getFiltered();
+  if (heroes.length === 0) return;
+  if (spinning) return;
+  spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+  document.getElementById('resultHero').textContent = '…';
+  document.getElementById('resultRole').textContent = '';
+
+  // Flash
+  const flash = document.getElementById('flash');
+  flash.classList.add('show');
+  setTimeout(() => flash.classList.remove('show'), 120);
+
+  // Pick a winner index
+  const winnerIdx = Math.floor(Math.random() * heroes.length);
+  const arc = (2 * Math.PI) / heroes.length;
+
+  // We want the wheel to stop so that winnerIdx segment is at the top (pointer at -π/2)
+  // Pointer is at top = angle -π/2
+  // Center of winner segment should land at top
+  // winnerCenter = startAngle + arc/2 = rotationOffset + winnerIdx*arc + arc/2
+  // We want winnerCenter = -π/2 + 2πk => rotationOffset = -π/2 - winnerIdx*arc - arc/2
+  const extraSpins = 8 + Math.random() * 5;
+  const targetOffset = -Math.PI / 2 - (winnerIdx * arc + arc / 2) + extraSpins * 2 * Math.PI;
+
+  const duration = 5000 + Math.random() * 1500;
+  const startTime = performance.now();
+  const startAngle = currentAngle;
+
+  function ease(t) {
+    // Cubic ease-out
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    const eased = ease(t);
+    currentAngle = startAngle + (targetOffset - startAngle) * eased;
+    drawWheel(currentAngle);
+    if (t < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      currentAngle = targetOffset;
+      drawWheel(currentAngle);
+      // Reveal result
+      const hero = heroes[winnerIdx];
+      const el = document.getElementById('resultHero');
+      el.textContent = hero.name;
+      el.style.color = ROLE_COLORS[hero.role];
+      const roleEl = document.getElementById('resultRole');
+      roleEl.innerHTML = `<span class="result-role" style="background:${ROLE_COLORS[hero.role]}22;border:1.5px solid ${ROLE_COLORS[hero.role]};color:${ROLE_COLORS[hero.role]}">${hero.role}</span>`;
+      spinning = false;
+      document.getElementById('spinBtn').disabled = false;
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function toggleRole(btn) {
+  const role = btn.dataset.role;
+  if (activeRoles.has(role)) {
+    if (activeRoles.size <= 1) return; // keep at least one
+    activeRoles.delete(role);
+    btn.classList.remove('active');
+  } else {
+    activeRoles.add(role);
+    btn.classList.add('active');
+  }
+  document.getElementById('heroCount').textContent = getFiltered().length;
+  drawWheel(currentAngle);
+}
+
+// Init
+document.getElementById('heroCount').textContent = getFiltered().length;
+drawWheel(0);
+
+// Handle resize for mobile
+function resizeCanvas() {
+  const size = Math.min(window.innerWidth - 32, 420);
+  if (size < 420) {
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+    document.querySelector('.wheel-outer').style.width = size + 'px';
+    document.querySelector('.wheel-outer').style.height = size + 'px';
+  }
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+</script>
 </body>
-</html>
+      </html>
